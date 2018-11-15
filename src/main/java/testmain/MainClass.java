@@ -7,7 +7,11 @@ public class MainClass {
       MainClass main = new MainClass();
       main.emit();
    }
+
    public void emit(){
       Observable.just("Hello","RxJava2").subscribe(System.out::println);
    }
+
+
+
 }
