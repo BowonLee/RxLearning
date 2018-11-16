@@ -1,7 +1,13 @@
 package testmain;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.observables.ConnectableObservable;
+import io.reactivex.subjects.AsyncSubject;
+import io.reactivex.subjects.BehaviorSubject;
+import io.reactivex.subjects.PublishSubject;
+import io.reactivex.subjects.ReplaySubject;
 import org.reactivestreams.Publisher;
 
 import java.util.ArrayList;
@@ -30,7 +36,13 @@ public class Cp2Observable {
         //observable.fromIterableTest();
 //        observable.fromCallableTest();
 //        observable.fromFutureTest();
-        observable.fromPublisher();
+       // observable.fromPublisher();
+      //  observable.singleTest();
+       // observable.asyncSubjectTest();
+      //  observable.behaviorSubjectTest();
+        //observable.publishSubjectTest();
+       // observable.replaySubjectTest();
+        observable.connectableObservable();
     }
 
     public void justTest(){
@@ -122,7 +134,7 @@ public class Cp2Observable {
         Observable source2 = Observable.fromIterable(set);
         source2.subscribe(System.out::println);
 
-        BlockingQueue orderQueue = new ArrayBlockingQueue<>(100);
+        BlockingQueue<Object> orderQueue = new ArrayBlockingQueue<>(100);
         orderQueue.add("one");
         orderQueue.add("two");
         orderQueue.add("three");
@@ -186,4 +198,141 @@ public class Cp2Observable {
 
     }
 
+    public void singleTest(){
+        /*
+        * Single 클레스는 하나의 데이터만을 발행하는 클레스이다.
+        * 결과가 유일한 서버 API를 호출하는 대 쓰인다.
+        * */
+
+        // Single을 선언하여 일반 Observable 처럼 발행 할 수 있다.
+        Single<String> source0 = Single.just("I'm single");
+        source0.subscribe(System.out::println);
+
+        /*
+        * Single은 Observable의 특수한 형태이기에 Observable에서 변환할 수 있다.
+        * */
+        //1. Observable -> Single
+        // 첫번쨰 값을 Single로 발행한다 인자가 둘 이상 들어 있는 경우 에러 발생
+        Observable<String> source1 = Observable.just("I'm single");
+        Single.fromObservable(source1).subscribe(System.out::println);
+
+        //2. single() 메서드를 호출하여 생성
+        // Obserbale 인자가 없는 경우 디폴트 벨류가 발행
+        Observable.just("I'm single").single("defalut item").subscribe(System.out::println);
+
+        //3. first함수를 호출하여 생성
+        //여러 데이터를 발행 할 수 있는 Observable을 Single로 발행 한다. 여러 데이터가 있는 경우에도 첫 데이터 발행 이후 onSuccess
+        String[] numbers = {"One", "Two", "Three"};
+        Observable.fromArray(numbers).first("default value").subscribe(System.out::println);
+
+        //4. empty Observable 에서 객체 생성
+        //아무 데이터가 발행하지 않는 경우 디폴트 값이 출력된다.
+        Observable.empty().single("default value").subscribe(System.out::println);
+
+        //5. take()함수에서 Single 객체 생성
+        Observable.just("123", "456").take(1).single("000").subscribe(System.out::println);
+    }
+
+    public void asyncSubjectTest(){
+
+        /*
+        * Subject : 차가운 Observable을 뜨거운 Observable로 변환 시켜주는 클레스
+        * Observable 과 같이 여러 클레스들을 제공하여 다른 상황을 처리 할 수 있다.
+        */
+        // AsyncSubject : 마직막으로 발행 한 데이터를 가져오는 클래스, 언제 호출하던 마지막 데이터만 처리한다.
+        // 만일 complete를 명시하지 않는다면 호출하지 못한다.
+        // 또한 complete 이후의 값들은 모두 무시한다.
+        AsyncSubject<String> asyncSubject = AsyncSubject.create();
+        asyncSubject.subscribe(data -> System.out.println("Subscribe 1 : " + data));
+        asyncSubject.onNext("1");
+        asyncSubject.onNext("3");
+        asyncSubject.subscribe(data -> System.out.println("Subscribe 2 : " + data));
+        asyncSubject.onNext("5");
+        asyncSubject.onComplete();
+
+        // subscrobe 를 통해 동작하는 AsyncSubject
+        //Subject 클레스는 Obervable 클레스를 상속받아 구현되어 있기에 이런 방식의 사용이 가능하다.
+        Float[] temperature = {10.1f,13.4f,12.5f};
+        Observable<Float> source = Observable.fromArray(temperature);
+
+        AsyncSubject<Float> subject = AsyncSubject.create();
+        subject.subscribe(data->System.out.println("Subscribe 3 => " + data));
+
+        source.subscribe(subject);
+    }
+
+    public void behaviorSubjectTest(){
+        /*
+        * 구독자가 구독을 하면 가장 최근의 값, 혹은 기본값을 넘겨주는 클레스이다.
+        * */
+
+        BehaviorSubject<String> behaviorSubject = BehaviorSubject.createDefault("6");
+        behaviorSubject.subscribe(data->System.out.println("Subscriber 1 => "+ data));
+        behaviorSubject.onNext("1");
+        behaviorSubject.onNext("3");
+        behaviorSubject.subscribe(data->System.out.println("Subscriber 2 => "+ data));
+        behaviorSubject.onNext("5");
+        behaviorSubject.onComplete();
+
+    }
+    public void publishSubjectTest(){
+        /*
+        * 구독자가 발행을 시작하면 해당 시간부터 발행을 시작한다.
+        * 기본값은 없다.
+        * */
+        PublishSubject<String> publishSubject= PublishSubject.create();
+        publishSubject.subscribe(data->System.out.println("subscribe #1 :" +data));
+        publishSubject.onNext("1");
+        publishSubject.onNext("3");
+        publishSubject.subscribe(data->System.out.println("subscribe #2 :" +data));
+        publishSubject.onNext("5");
+        publishSubject.onComplete();
+    }
+
+    public void replaySubjectTest(){
+
+        /*
+        * 차가운 Observable 처럼 동작하는 Subject
+        * 구독자가 생기면 처음부터 끝까지 모두 발행한다.
+        * */
+        ReplaySubject replaySubject =ReplaySubject.create();
+        replaySubject.subscribe(data->System.out.println("Subscribe #1 - "+ data));
+        replaySubject.onNext("1");
+        replaySubject.onNext("3");
+        replaySubject.subscribe(data->System.out.println("Subscribe #2 - "+ data));
+        replaySubject.onNext("5");
+    }
+
+
+    public void connectableObservable(){
+        /*
+        *차가운 Observable 을 뜨거운 Observable로 변환해 준다
+        * 원 데이터 하나른 여러 사용자에게 전달 할 떄 사용한다.
+        * connect 함수를 호출하면 그 전까지 구독한 모든 구독자에게 데이터를 발행한다.
+        * connect 이후의 구독자는 구독 이후에 발생한 데이터가 발행된다.
+        *
+        * */
+
+        String[] data = {"1","3","5"};
+        Observable<String> balls = Observable.interval(100L,TimeUnit.MILLISECONDS).map(Long::intValue).map(i->data[i]).take(data.length);
+        ConnectableObservable<String> source = balls.publish();
+
+        source.subscribe(value-> System.out.println("Subscriber #1 : " + value));
+        source.subscribe(value-> System.out.println("Subscriber #2 : " + value));
+        source.connect();
+
+        try {
+            Thread.sleep(250);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        source.subscribe(value-> System.out.println("Subscriber #3 : " + value));
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
+    }
 }
