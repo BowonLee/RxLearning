@@ -223,6 +223,9 @@ public class Cp2Observable {
         //3. first함수를 호출하여 생성
         //여러 데이터를 발행 할 수 있는 Observable을 Single로 발행 한다. 여러 데이터가 있는 경우에도 첫 데이터 발행 이후 onSuccess
         String[] numbers = {"One", "Two", "Three"};
+        Integer[] arr={};
+        int[] arr2;
+
         Observable.fromArray(numbers).first("default value").subscribe(System.out::println);
 
         //4. empty Observable 에서 객체 생성

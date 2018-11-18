@@ -17,7 +17,7 @@ fun main(args:Array<String>){
 
     //justExample()
     //createExample()
-    //fromArrayTest()
+    fromArrayTest()
     //fromIterableTest()
     //fromCallableTest()
    // fromFutureTest()
@@ -27,7 +27,7 @@ fun main(args:Array<String>){
 //    behaviorSubject()
 //    publishSubject()
 //    replaysubject()
-    connectableObservable()
+   // connectableObservable()
 }
 fun justExample(){
     /*
@@ -97,12 +97,14 @@ fun fromArrayTest(){
     * Rx 환경에서 fromArray를 원활히 사용하려면 조금 더 연구가 필요할 듯 하다.
     * */
     val array = List(3){i->i+1}
+    val array2 = listOf(1,2,3)
 
-    val observableData = Observable.fromArray(array)
+
+    val observableData = Observable.fromArray(array2)
 
 
-    //observableData.subscribe({println(it)})
-    observableData.subscribe(System.out::println)
+    observableData.subscribe({println(it)})
+    observableData.subscribe({ it.forEach { println(it) }})
 }
 fun fromIterableTest(){
     /*
