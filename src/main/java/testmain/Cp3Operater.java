@@ -82,7 +82,8 @@ public class Cp3Operater {
         // 각 숫자를 fromArray를 통해 입력한다. 또한 flatMap을 사용하여 Observable을 리턴하는 Function을 인자로 받는다.
         Observable<String> source1 = Observable.fromArray(numbers).flatMap(makeRow);
         source1.subscribe(System.out::println);
-        // 각각 단은 row로 출력하고, line마다 개행을 하도록 할 수는 없을까.
+        // 각각 단은 row로 출력하고, flatMap + Observacle 형태를 유지하면서 line마다 개행을 하도록 할 수는 없을까.
+
 
     }
 }
