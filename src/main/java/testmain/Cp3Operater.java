@@ -1,6 +1,7 @@
 package testmain;
 
 import io.reactivex.Observable;
+import io.reactivex.Single;
 import io.reactivex.functions.Function;
 
 
@@ -28,7 +29,8 @@ public class Cp3Operater {
         Cp3Operater cp3Operater = new Cp3Operater();
         //cp3Operater.mapOperater();
         //cp3Operater.flatMapOperater();
-        cp3Operater.gugudanInRx();
+        //cp3Operater.gugudanInRx();
+        cp3Operater.filterOperater();
     }
 
 
@@ -86,4 +88,52 @@ public class Cp3Operater {
 
 
     }
+
+    /*
+    * boolean을 리턴하는 고차함수
+    * boolean을 리턴하는 람다식을 대입하여 사용한다.
+    * */
+    private void filterOperater(){
+        // 문자열 필터링
+        String[] objs = {"1 CIRCLE","2 DIAMOND","3 TRIANGLE","4 DIAMOND", "5 CIRCLE", "6 HEXAGON"};
+        Observable<String> source = Observable.fromArray(objs).filter(obj->obj.endsWith("CIRCLE"));
+        source.subscribe(System.out::println);
+
+        // 숫자 필터링
+        Integer[] data = {1,2,3,4,5,6,7,8,9,10};
+        Observable<Integer> source2 = Observable.fromArray(data).filter(num-> num%2 == 0 );
+        source2.subscribe(System.out::println);
+
+        /*
+        * fillter와 비슷한 기능의 함수들
+        * */
+
+        //first()       첫번쨰 값을 리턴, 값이 없을경우 기본 값 -> Single객체에서 사용된다.
+        // 반드시 하나의 값만을 가지기 때문에 이와같이 사용하는 듯 하다.
+        Single<Integer> source3 = Observable.fromArray(data).first(0);
+        source3.subscribe(result->System.out.println("first( )\t:" + result));
+        //last(()       마지막 값을 리턴, 값이 없을경우 기본 값 -> 처음, 끝의 차이는 있지만 이유는 같다.
+        Single<Integer> source4 = Observable.fromArray(data).last(0);
+        source4.subscribe(result->System.out.println("last( )\t:" + result));
+        //take(N)       처음 N개의 값을 가져온다
+        Observable<Integer> source5 = Observable.fromArray(data).take(3);
+        source5.subscribe(result->System.out.println("take(3)\t:" + result));
+        //takeLast(N)   마지막 N개의 값
+        Observable<Integer> source6 = Observable.fromArray(data).take(3);
+        source6.subscribe(result->System.out.println("takeLast(3)\t:" + result));
+        //skip(N)       최초 N개의 값을 건너 뜀
+        Observable<Integer> source7 = Observable.fromArray(data).skip(3);
+        source7.subscribe(result->System.out.println("skip(3)\t:" + result));
+        //skipLast(N)   마지막 N개의 값을 건너 뜀
+        Observable<Integer> source8 = Observable.fromArray(data).skipLast(3);
+        source8.subscribe(result->System.out.println("skipLast(3)\t:" + result));
+
+
+    }
 }
+
+
+
+
+
+
